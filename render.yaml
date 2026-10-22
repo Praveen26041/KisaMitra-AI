@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: kisanmitra-ai
+    runtime: python
+    plan: free
+    # Trains the crop model during the build. If the dataset cannot be downloaded the build
+    # still succeeds and the app falls back to its labelled baseline ranking.
+    buildCommand: pip install -r requirements.txt && (python get_data.py && python train_model.py || echo "Model not trained - using baseline ranking")
+    startCommand: gunicorn app:app --workers 1 --threads 4 --timeout 120
+    healthCheckPath: /api/health
+    autoDeploy: true
+    envVars:
+      # Optional: turns on the chat box. Add the key in the Render dashboard (it is never committed).
+      - key: ANTHROPIC_API_KEY
+        sync: false
